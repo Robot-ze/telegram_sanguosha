@@ -18,6 +18,7 @@ import java.util.concurrent.Future;
 import org.telegram.telegrambots.client.okhttp.OkHttpTelegramClient;
 import org.telegram.telegrambots.longpolling.util.LongPollingSingleThreadUpdateConsumer;
 import org.telegram.telegrambots.meta.api.methods.AnswerCallbackQuery;
+import org.telegram.telegrambots.meta.api.methods.GetMe;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.DeleteMessage;
@@ -160,12 +161,13 @@ public class RunGameBot implements LongPollingSingleThreadUpdateConsumer, MsgAPI
     }
 
     private void getBotName() {
-        GetMyName getMyName = GetMyName.builder().build();
+        GetMe getMe = new GetMe();
         try {
-            BotName bn = telegramClient.execute(getMyName);
-            bootName = bn.getName();
+            User bn = telegramClient.execute(getMe);
+            System.out.println(bn);
+            bootName = bn.getUserName();
         } catch (TelegramApiException e) {
-            // TODO Auto-generated catch block
+           
             e.printStackTrace();
         }
     }
