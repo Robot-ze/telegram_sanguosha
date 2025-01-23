@@ -1,7 +1,6 @@
 package telegramBot;
 
 import java.io.Serializable;
-
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
@@ -10,15 +9,16 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.Future;
 
 import org.telegram.telegrambots.client.okhttp.OkHttpTelegramClient;
 import org.telegram.telegrambots.longpolling.util.LongPollingSingleThreadUpdateConsumer;
 import org.telegram.telegrambots.meta.api.methods.AnswerCallbackQuery;
 import org.telegram.telegrambots.meta.api.methods.GetMe;
+import org.telegram.telegrambots.meta.api.methods.botapimethods.BotApiMethod;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.DeleteMessage;
@@ -35,7 +35,6 @@ import org.telegram.telegrambots.meta.api.objects.User;
 import org.telegram.telegrambots.meta.api.objects.media.InputMedia;
 import org.telegram.telegrambots.meta.api.objects.media.InputMediaPhoto;
 import org.telegram.telegrambots.meta.api.objects.message.Message;
-import org.telegram.telegrambots.meta.api.objects.name.BotName;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboard;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
@@ -43,24 +42,20 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKe
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.meta.generics.TelegramClient;
 
+import components.BlockingMap;
+import components.TimeLimit;
 import config.Config;
 import config.Text;
 import db.ImgDB;
-import msg.ReturnType;
 import msg.CallBackMap;
 import msg.CallbackEven;
 import msg.MsgAPI;
 import msg.MsgObj;
-
-import org.telegram.telegrambots.meta.api.methods.botapimethods.BotApiMethod;
-import org.telegram.telegrambots.meta.api.methods.name.GetMyName;
-
+import msg.ReturnType;
 import sanguosha.cards.Card;
 import sanguosha.manager.GameManager;
 import sanguosha.people.Person;
 import sanguosha.user.SanUser;
-import components.BlockingMap;
-import components.TimeLimit;
 
 /**
  * 这个类一定不能有阻塞方法，如果阻塞了这个机器人，程序就会变卡，阻塞方法放在游戏管理器那边
@@ -70,7 +65,7 @@ public class RunGameBot implements LongPollingSingleThreadUpdateConsumer, MsgAPI
     private final TelegramClient telegramClient;
     private final CallBackMap callBackMap = new CallBackMap();
     private boolean testMode = false;
-    private String bootName;
+    private String botName;
 
     public CallBackMap getCallBackMap() {
         return callBackMap;
@@ -89,7 +84,7 @@ public class RunGameBot implements LongPollingSingleThreadUpdateConsumer, MsgAPI
     public RunGameBot(String botToken) {
         testMode = false;
         telegramClient = new OkHttpTelegramClient(botToken);
-        getBotName();
+        getBotNameExec();
         joinGameCtrl = new JoinGameContrller(this);
 
     }
@@ -103,7 +98,7 @@ public class RunGameBot implements LongPollingSingleThreadUpdateConsumer, MsgAPI
     public RunGameBot(String botToken, boolean testMode) {
         // testMode = true;
         telegramClient = new OkHttpTelegramClient(botToken);
-        getBotName();
+        getBotNameExec();
         if (testMode) {
             joinGameCtrl = new JoinGameContrller(this, testMode);
         } else {
@@ -125,7 +120,7 @@ public class RunGameBot implements LongPollingSingleThreadUpdateConsumer, MsgAPI
         testMode = true;
         joinGameCtrl = new JoinGameContrller(this, testMode);
         telegramClient = new OkHttpTelegramClient(botToken);
-        getBotName();
+        getBotNameExec();
         RunGameBot thisBot = this;
         Future<String> f = threadPoolExecutor.submit(
                 new Callable<String>() {
@@ -136,7 +131,7 @@ public class RunGameBot implements LongPollingSingleThreadUpdateConsumer, MsgAPI
                             try {
                                 long ChatId = -1002308456428L;
                                 List<SanUser> users = new ArrayList<>();
-                                //这里单机测试
+                                // 这里单机测试
                                 users.add(new SanUser("测试人", 11111L, "@xxxxxx"));
                                 GameManager g = new GameManager(thisBot, users);
                                 g.setTestMode(test, testRoles, testCardClass);
@@ -153,6 +148,11 @@ public class RunGameBot implements LongPollingSingleThreadUpdateConsumer, MsgAPI
 
     }
 
+    @Override
+    public String getBotName() {
+        return botName;
+    }
+
     private boolean isMsgFromGroup(Message ApiMsg) {
         if (ApiMsg.getChat().isGroupChat() || ApiMsg.getChat().isSuperGroupChat()) {
             return true;
@@ -160,14 +160,14 @@ public class RunGameBot implements LongPollingSingleThreadUpdateConsumer, MsgAPI
         return false;
     }
 
-    private void getBotName() {
+    private void getBotNameExec() {
         GetMe getMe = new GetMe();
         try {
             User bn = telegramClient.execute(getMe);
             System.out.println(bn);
-            bootName = bn.getUserName();
+            botName = bn.getUserName();
         } catch (TelegramApiException e) {
-           
+
             e.printStackTrace();
         }
     }
@@ -919,7 +919,7 @@ public class RunGameBot implements LongPollingSingleThreadUpdateConsumer, MsgAPI
                             InlineKeyboardButton
                                     .builder()
                                     .text(entry[0])
-                                    .url(Text.format("https://t.me/%s?start=%s", bootName, entry[1]))
+                                    .url(Text.format("https://t.me/%s?start=%s", botName, entry[1]))
                                     .build());
                 } else {
                     buttons.add(

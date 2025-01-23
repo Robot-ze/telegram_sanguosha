@@ -57,7 +57,7 @@ public class JoinGameContrller implements LatchManager {
     public void start(Update update) {
         MsgObj msg=MsgObj.newMsgObj(this);
         msg.chatId=update.getMessage().getChatId();
-        msg.text="💬请将机器人拉入一个群组中,在群组中输入 /sha 启动";
+        msg.text="<a href=\"t.me/"+msgAPI.getBotName()+"?startgroup=start\">💬请将机器人拉入一个群组中</a>,并赋予删除消息权限,在群组中输入 /sha 启动";
         msgAPI.sendMsg(msg);
         
         // DeleteMessage del = DeleteMessage.builder()

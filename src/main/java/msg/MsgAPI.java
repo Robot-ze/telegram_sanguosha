@@ -456,4 +456,6 @@ public interface MsgAPI {
 
   public void endGame(long chatId);
 
+public String getBotName();
+
 }
