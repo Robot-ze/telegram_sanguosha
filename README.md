@@ -1,7 +1,8 @@
 # telegram_sanguosha
 # 电报版本的三国杀
 
-![photo_2025-01-22_16-25-22](https://github.com/user-attachments/assets/ea1faba8-4cd5-4418-8bd9-c3deae680ec8)
+![photo_2025-01-22_16-25-22](https://github.com/user-attachments/assets/2c87fd9d-54cb-4fd3-bbd6-973431bda7ce)
+
 
 在电报群里玩三国杀，哈哈，没听说过吧
 身份局，支持标准包+风火林山神将，少量SP角色，模式为多人
@@ -14,7 +15,7 @@ by Robot-ze
 
 把机器人 [@shanguoshabot](https://t.me/shanguoshabot) 拉入一个群中，在群中输入 /sha
 
-### 运行
+## 运行
 
 先到 [@BotFather](https://t.me/BotFather) 获取一个 &lt;token&gt;
 
